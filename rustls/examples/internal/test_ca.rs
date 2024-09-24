@@ -197,23 +197,18 @@ impl Role {
             }
             Self::EndEntity | Self::Client => {
                 params.is_ca = IsCa::NoCa;
-                params.key_usages = EE_KEY_USAGES.to_vec();
+                //params.key_usages = EE_KEY_USAGES.to_vec();
                 params.subject_alt_names = vec![
-                    SanType::DnsName(Ia5String::try_from("testserver.com".to_string()).unwrap()),
-                    SanType::DnsName(
-                        Ia5String::try_from("second.testserver.com".to_string()).unwrap(),
-                    ),
                     SanType::DnsName(Ia5String::try_from("localhost".to_string()).unwrap()),
-                    SanType::IpAddress(IpAddr::from_str("198.51.100.1").unwrap()),
-                    SanType::IpAddress(IpAddr::from_str("2001:db8::1").unwrap()),
+                    SanType::IpAddress(IpAddr::from_str("127.0.0.1").unwrap()),
                 ];
             }
         }
 
-        // Client certificates additionally get the client auth EKU.
-        if *self == Self::Client {
-            params.extended_key_usages = vec![ExtendedKeyUsagePurpose::ClientAuth];
-        }
+        // // Client certificates additionally get the client auth EKU.
+        // if *self == Self::Client {
+        //     params.extended_key_usages = vec![ExtendedKeyUsagePurpose::Any];
+        // }
 
         params
     }
@@ -223,12 +218,12 @@ impl Role {
         distinguished_name.push(
             DnType::CommonName,
             match self {
-                Self::Client => "ponytown client".to_owned(),
+                Self::Client => "client".to_owned(),
                 Self::EndEntity => "testserver.com".to_owned(),
                 Self::Intermediate => {
-                    format!("ponytown {} level 2 intermediate", alg.issuer_cn)
+                    format!("{} level 2 intermediate", alg.issuer_cn)
                 }
-                Self::TrustAnchor => format!("ponytown {} CA", alg.issuer_cn),
+                Self::TrustAnchor => format!("{} CA", alg.issuer_cn),
             },
         );
         distinguished_name
